@@ -173,7 +173,7 @@ def create_model():
     # define the model        
     model = NN([5, 10, 10, 7], activations=['tanh', 'tanh','softmax'], loss='categorical_cross_entropy')
     # define the learning rate
-    learning_rate = 0.1
+    learning_rate = 1
     return model,X_dummy,Y_dummy,learning_rate
 
 model_obj_global,x_train_global,y_train_global,learning_rate_global = create_model()

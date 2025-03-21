@@ -35,7 +35,7 @@ self.addEventListener("message", async (event) => {
 			const res = await pyodide.runPythonAsync(trainCode);
 			const updatedWeights = await pyodide.globals.get("send_weights");
 			const updatedBiases = await pyodide.globals.get("send_biases");
-			console.log(updatedWeights.toJs());
+			// console.log(updatedWeights.toJs());
 			// console.log(updatedBiases.toJs());
 			const updatedPredictions = await pyodide.globals.get(
 				"predictions_global"

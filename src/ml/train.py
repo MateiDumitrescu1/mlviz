@@ -1,4 +1,5 @@
 from js import postMessage
+# import time
 def get_weights(model):
     layers = model.layers
     weights = []
@@ -30,3 +31,4 @@ def convert_weights_to_string(weights):
 string_to_send = convert_weights_to_string(send_weights)
 
 postMessage(string_to_send)
+# time.sleep(0.1)

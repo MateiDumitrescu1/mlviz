@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import { startTraining, onWorkerMessageExecute } from "./workerApi.mjs";
+import WeightsGraph from "./components/WeightsGraph";
+import WeightsHeatmap from "./components/WeightsHeatmap";
 const decodeString = (encodedString) => {
 	// split on # to get the layers
 	// split each layer on | to get the neuron weights
@@ -24,8 +26,8 @@ const decodeString = (encodedString) => {
 };
 function App() {
 	const weightsRef = useRef(0);
-	const predictionsRef = useRef(0);
-	const [weights, setWeights] = useState(0);
+	// const predictionsRef = useRef(0);
+	const [decodedWeights, setDecodedWeights] = useState([]);
 	const run = async () => {
 		console.log("calling startTraining");
 		await startTraining("Hello");
@@ -34,9 +36,9 @@ function App() {
 		const data = event.data;
 		weightsRef.current = data;
 		// console.log(data);
-		const alw = decodeString(data);
-		console.log(alw);
-		setWeights(data);
+		const all_weights_decoded = decodeString(data);
+		// console.log(all_weights_decoded);
+		setDecodedWeights(all_weights_decoded);
 	};
 	useEffect(() => {
 		run();
@@ -45,7 +47,7 @@ function App() {
 	return (
 		<>
 			<button onClick={run}>Start</button>
-			<div>{weightsRef.current}</div>
+			<WeightsGraph weights={decodedWeights} />
 		</>
 	);
 }
