@@ -7,3 +7,7 @@ const pyodideWorker = new Worker(new URL("./webworker.mjs", import.meta.url), {
 export async function startTraining(data) {
 	pyodideWorker.postMessage(data);
 }
+
+export function onWorkerMessageExecute(callback) {
+	pyodideWorker.addEventListener("message", callback);
+}
