@@ -1,37 +1,15 @@
 import React, { useRef, useEffect } from "react";
-
-const WeightsGraph = ({ weights }) => {
+import { initWeightsFromLayerNeuronCounts } from "../utils/utils";
+let width;
+let height;
+let ctx;
+const WeightsGraph = ({ weights, layerNeuronCounts }) => {
 	const canvasRef = useRef(null);
-
-	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
-		const ctx = canvas.getContext("2d");
-		const width = canvas.width;
-		const height = canvas.height;
-
-		// Clear the canvas
-		ctx.clearRect(0, 0, width, height);
-
-		if (!weights || weights.length === 0) return;
-		console.log(weights[0][0]);
-		// Determine the number of layers and neurons per layer.
-		const numLayers = weights.length + 1;
-		const layerNeurons = [];
-
-		// Determine input layer neurons (from first weight matrix)
-		const inputCount = weights[0][0].length;
-		layerNeurons.push(inputCount);
-
-		// Each weight matrix gives the neuron count for the next layer.
-		weights.forEach((matrix) => {
-			layerNeurons.push(matrix.length);
-		});
-
-		// Compute positions for each neuron in each layer.
+	const computeNeuronPositions = (layerNeuronCounts) => {
 		const neuronPositions = [];
+		let numLayers = layerNeuronCounts.length;
 		for (let layer = 0; layer < numLayers; layer++) {
-			const count = layerNeurons[layer];
+			const count = layerNeuronCounts[layer];
 			const x = ((layer + 1) * width) / (numLayers + 1);
 			const positions = [];
 			for (let i = 0; i < count; i++) {
@@ -40,19 +18,40 @@ const WeightsGraph = ({ weights }) => {
 			}
 			neuronPositions.push(positions);
 		}
-
+		return neuronPositions;
+	};
+	const drawNeurons = (neuronPositions, layerNeuronCounts) => {
+		// Draw neurons as circles, from the array of computed positions
+		const neuronRadius = 12;
+		neuronPositions.forEach((layer) => {
+			layer.forEach((pos) => {
+				ctx.beginPath();
+				ctx.arc(pos.x, pos.y, neuronRadius, 0, Math.PI * 2);
+				ctx.fillStyle = "#fff";
+				ctx.fill();
+				ctx.strokeStyle = "#000";
+				ctx.stroke();
+			});
+		});
+		return neuronPositions;
 		// Draw connections (weights) between layers.
+	};
+	const drawWeights = (weights, neuronPositions) => {
+		if (weights.length === 0) {
+			weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
+		}
+
 		for (let i = 0; i < weights.length; i++) {
 			const weightMatrix = weights[i];
 			const sourcePositions = neuronPositions[i];
 			const targetPositions = neuronPositions[i + 1];
 
 			for (let j = 0; j < weightMatrix.length; j++) {
-				const weightVector = weightMatrix[j];
+				const weightVector = weightMatrix[j]; // weightVector = weights going to j-th neuron in next layer
 				for (let k = 0; k < weightVector.length; k++) {
 					const weight = weightVector[k];
-					const start = sourcePositions[k];
-					const end = targetPositions[j];
+					const start = sourcePositions[k]; // neuron in this layer
+					const end = targetPositions[j]; // neuron in next layer
 
 					ctx.beginPath();
 					ctx.moveTo(start.x, start.y);
@@ -75,27 +74,27 @@ const WeightsGraph = ({ weights }) => {
 				}
 			}
 		}
+	};
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+		ctx = canvas.getContext("2d");
+		width = canvas.width;
+		height = canvas.height;
 
-		// Draw neurons as circles.
-		const neuronRadius = 12;
-		neuronPositions.forEach((layer) => {
-			layer.forEach((pos) => {
-				ctx.beginPath();
-				ctx.arc(pos.x, pos.y, neuronRadius, 0, Math.PI * 2);
-				ctx.fillStyle = "#fff";
-				ctx.fill();
-				ctx.strokeStyle = "#000";
-				ctx.stroke();
-			});
-		});
+		ctx.clearRect(0, 0, width, height); // Clear the canvas
+		const neuronPositions = computeNeuronPositions(layerNeuronCounts);
+		drawWeights(weights, neuronPositions);
+		drawNeurons(neuronPositions, layerNeuronCounts);
+
 		// Force deep checking of weights by using JSON.stringify
 	}, [JSON.stringify(weights)]);
 
 	return (
 		<canvas
 			ref={canvasRef}
-			width={1200}
-			height={800}
+			width={1300}
+			height={900}
 			style={{ border: "1px solid #ccc" }}
 		/>
 	);

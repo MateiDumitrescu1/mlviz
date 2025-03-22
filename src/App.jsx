@@ -4,6 +4,7 @@ import { startTraining, onWorkerMessageExecute } from "./workerApi.mjs";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
+import { initWeightsFromLayerNeuronCounts } from "./utils/utils";
 const decodeString_weights = (encodedString) => {
 	// split on # to get the layers
 	// split each layer on | to get the neuron weights
@@ -38,8 +39,10 @@ const decodeString_predictions = (encodedString) => {
 	}
 	return all_predictions;
 };
+
 function App() {
 	const [decodedWeights, setDecodedWeights] = useState([]);
+	const [layerNeuronCounts, setLayerNeuronCounts] = useState([5, 10, 10, 7]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
 	const run = async () => {
 		console.log("calling startTraining");
@@ -57,17 +60,23 @@ function App() {
 		} else if (firstChar === "p") {
 			const all_predictions_decoded = decodeString_predictions(string);
 			setDecodedPredictions(all_predictions_decoded);
-			console.log(all_predictions_decoded);
+			// console.log(all_predictions_decoded);
 		}
 	};
 	useEffect(() => {
-		run();
+		if (decodedWeights == []) {
+			const weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
+			setDecodedWeights(weights);
+		}
 		onWorkerMessageExecute(handleWeightUpdate);
 	}, []);
 	return (
 		<>
 			<button onClick={run}>Start</button>
-			<WeightsGraph weights={decodedWeights} />
+			<WeightsGraph
+				weights={decodedWeights}
+				layerNeuronCounts={layerNeuronCounts}
+			/>
 			<PredictionsMatrix predictions={decodedPredictions} />
 		</>
 	);
