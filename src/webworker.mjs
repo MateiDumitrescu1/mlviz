@@ -28,6 +28,7 @@ self.addEventListener("message", async (event) => {
 	// const scriptLines = pythonScript.split("\n");
 	// pythonScript = scriptLines.slice(1).join("\n");
 	let epochs = 100;
+	let updatedPredictions;
 	try {
 		for (let i = 1; i <= epochs; i++) {
 			// const runScript = `i=${i};${pythonScript}`;
@@ -37,16 +38,15 @@ self.addEventListener("message", async (event) => {
 			const updatedBiases = await pyodide.globals.get("send_biases");
 			// console.log(updatedWeights.toJs());
 			// console.log(updatedBiases.toJs());
-			const updatedPredictions = await pyodide.globals.get(
+			updatedPredictions = await pyodide.globals.get(
 				"predictions_global"
 			);
-			// console.log(updatedPredictions.toJs());
 		}
 	} catch (error) {
 		console.log(error);
 	}
-
+	// const pred_encoded = encodePredictionsToString(updatedPredictions.toJs());
 	// Optionally, notify that training is complete.
-	console.log("training complete");
-	// postMessage({ status: "training complete" });
+	// console.log("training complete");
+	// postMessage(pred_encoded);
 });

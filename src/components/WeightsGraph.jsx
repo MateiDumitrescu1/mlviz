@@ -14,7 +14,7 @@ const WeightsGraph = ({ weights }) => {
 		ctx.clearRect(0, 0, width, height);
 
 		if (!weights || weights.length === 0) return;
-		// console.log(weights[0][0]);
+		console.log(weights[0][0]);
 		// Determine the number of layers and neurons per layer.
 		const numLayers = weights.length + 1;
 		const layerNeurons = [];

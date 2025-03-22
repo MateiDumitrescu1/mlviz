@@ -14,11 +14,21 @@ def get_weights(model):
 # train 1 epoch
 model_obj_global.train(x_train_global, y_train_global, epochs=1, lr=learning_rate_global)
 predictions_global = model_obj_global.forward(x_train_global)
-
+prediction_list = predictions_global.tolist()
 send_weights, send_biases = get_weights(model_obj_global)
 
+
+def encode_predictions_to_string(predictions):
+    encoded_string = "p"
+    for prediction in predictions:
+        for value in prediction:
+            encoded_string += str(value) + ","
+        encoded_string += "#"
+    return encoded_string
+
+
 def convert_weights_to_string(weights):
-    rez = ""
+    rez = "w"
     for layer_weights in weights: 
         # weight-urile pt fiecare layer sunt o matrice
         for neuron_weights in layer_weights:
@@ -29,6 +39,7 @@ def convert_weights_to_string(weights):
     return rez
 
 string_to_send = convert_weights_to_string(send_weights)
-
+prediction_string_to_send = encode_predictions_to_string(prediction_list)
 postMessage(string_to_send)
+postMessage(prediction_string_to_send)
 # time.sleep(0.1)
