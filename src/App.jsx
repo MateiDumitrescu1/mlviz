@@ -4,9 +4,15 @@ import { startTraining, onWorkerMessageExecute } from "./workerApi.mjs";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
-import { initWeightsFromLayerNeuronCounts } from "./utils/utils";
+import {
+	initWeightsFromLayerNeuronCounts,
+	train_test_split,
+} from "./utils/utils";
 import TaskSelectorDropdown from "./components/TaskSelectorDropdown";
 import { loadCSV } from "./utils/utils";
+
+import MultiClassPredictions from "./components/MultiClassPredictions";
+
 import Papa from "papaparse";
 
 const loadCSVFile = async (path) => {
@@ -30,7 +36,7 @@ const dummyDataFeatures = await loadCSVFile("./ml_data/Dummy_features.csv");
 const dummyDataLabels = await loadCSVFile("./ml_data/Dummy_labels.csv");
 // read the iris dataset
 const irisDataFeatures = await loadCSVFile("./ml_data/Iris_features.csv");
-const irisDataLabels = await loadCSVFile("./ml_data/Iris_labels.csv");
+const irisDataLabels = await loadCSVFile("./ml_data/Iris_labels_onehot.csv");
 // console.log(irisDataFeatures);
 const returnDatasetBasedOnTask = (task) => {
 	// given a task name, return the corresponding dataset
@@ -83,9 +89,32 @@ function App() {
 	const [decodedWeights, setDecodedWeights] = useState([]);
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([5, 10, 10, 7]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [xtest, setXtest] = useState([]);
+	const [ytest, setYtest] = useState([]);
+
+	//data refs and methods
 	const datasetRef = useRef(null);
+	const xtrainRef = useRef(null);
+	const ytrainRef = useRef(null);
+	const xtestRef = useRef(null);
+	const ytestRef = useRef(null);
+	const initDataRefsBasedOnTask = (taskValue) => {
+		datasetRef.current = returnDatasetBasedOnTask(taskValue);
+		const split_result = train_test_split(
+			taskValue,
+			datasetRef.current[0],
+			datasetRef.current[1]
+		);
+		xtrainRef.current = split_result[0];
+		ytrainRef.current = split_result[1];
+		xtestRef.current = split_result[2];
+		ytestRef.current = split_result[3];
+		// console.log(xtestRef.current);
+	};
+	// ready, loading
 	const [ready, setReady] = useState(false);
+	const [loading, setLoading] = useState(true);
+	// task selection options
 	const taskOptions = [
 		{ value: "iris", label: "Iris" },
 		{ value: "dummy", label: "Dummy example" },
@@ -94,35 +123,45 @@ function App() {
 	const handleSelectTask = (task) => {
 		// method to pass to the dropdown menu, to select the task
 		setSelectedTask(task);
+		initDataRefsBasedOnTask(task.value);
 		// change network configuration based on the selected task (input and output layers)
 		if (task.value === "iris") {
 			setLayerNeuronCounts([4, 10, 10, 3]);
 		} else if (task.value === "dummy") {
 			setLayerNeuronCounts([5, 10, 10, 7]);
 		}
-		// You can perform additional actions with the selected option here
-		// console.log(`Selected task: ${task.label}`);
 	};
 	const run = async () => {
 		// send the model parameters in the event data here
 		setReady(false);
-		datasetRef.current = returnDatasetBasedOnTask(selectedTask.value);
-		// console.log(datasetRef.current);
+		initDataRefsBasedOnTask(selectedTask.value);
 		console.log("calling startTraining");
 		await startTraining({
 			networkLayout: layerNeuronCounts,
 			task: selectedTask.value,
-			dataset: datasetRef.current,
+			x_train: xtrainRef.current,
+			y_train: ytrainRef.current,
+			x_test: xtestRef.current,
+			y_test: ytestRef.current,
 		});
 	};
 	const handleWeightUpdate = (event) => {
 		let string = event.data;
+		const obj = string;
+		// the object send is not a string, it's JSON
+		if (obj.xtest) {
+			setXtest(obj.xtest);
+			setYtest(obj.ytest);
+			return;
+		}
 		// console.log(data);
 		if (string == "numpy loaded") {
 			setReady(true);
 			setLoading(false);
+			return;
 		} else if (string == "training completed") {
 			setReady(true);
+			return;
 		}
 		const firstChar = string.charAt(0);
 		string = string.slice(1);
@@ -168,16 +207,27 @@ function App() {
 				layerNeuronCounts={layerNeuronCounts}
 				loading={loading}
 			/>
-			<PredictionsMatrix
-				predictions={dummyDataLabels}
-				fallback={undefined}
-				title={"True Labels (One-hot encoded)"}
-			/>
-			<PredictionsMatrix
-				predictions={decodedPredictions}
-				fallback={dummyDataLabels}
-				title={"Predictions (One-hot encoded)"}
-			/>
+			{selectedTask.value === "dummy" && (
+				<>
+					<PredictionsMatrix
+						predictions={dummyDataLabels}
+						fallback={undefined}
+						title={"True Labels (One-hot encoded)"}
+					/>
+					<PredictionsMatrix
+						predictions={decodedPredictions}
+						fallback={dummyDataLabels}
+						title={"Predictions (One-hot encoded)"}
+					/>
+				</>
+			)}
+			{selectedTask.value === "iris" && (
+				<MultiClassPredictions
+					samples={xtestRef.current}
+					trueLabels={ytestRef.current}
+					predictions={decodedPredictions}
+				/>
+			)}
 		</>
 	);
 }
