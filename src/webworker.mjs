@@ -2,6 +2,7 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodi
 
 let pyodide = await loadPyodide();
 await pyodide.loadPackage("numpy");
+postMessage("numpy loaded");
 console.log("numpy loaded");
 // Listen for messages from the main thread.
 // For now, we don't use any data from the event but keep the option open.
@@ -23,14 +24,16 @@ self.addEventListener("message", async (event) => {
 	let trainCode = await getPythonCode("train.py");
 	// initialize the model and the training example
 	await pyodide.runPythonAsync(initModelCode);
-
+	console.log("ran model init code");
 	// Remove the first line from the Python script
 	// const scriptLines = pythonScript.split("\n");
 	// pythonScript = scriptLines.slice(1).join("\n");
 	let epochs = 100;
 	let updatedPredictions;
 	try {
-		for (let i = 1; i <= epochs; i++) {
+		for (let i = 0; i <= epochs; i++) {
+			await pyodide.globals.set("epochNr", i);
+
 			// const runScript = `i=${i};${pythonScript}`;
 
 			const res = await pyodide.runPythonAsync(trainCode);
@@ -47,6 +50,6 @@ self.addEventListener("message", async (event) => {
 	}
 	// const pred_encoded = encodePredictionsToString(updatedPredictions.toJs());
 	// Optionally, notify that training is complete.
-	// console.log("training complete");
-	// postMessage(pred_encoded);
+	console.log("training completed");
+	postMessage("training completed");
 });

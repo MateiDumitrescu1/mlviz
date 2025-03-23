@@ -9,7 +9,6 @@ export const initWeightsFromLayerNeuronCounts = (layerNeuronCounts) => {
 	}
 	return weights;
 };
-
 const makeMatrix = (rows, cols) => {
 	return Array.from({ length: rows }, () =>
 		Array.from({ length: cols }, () => Math.random())

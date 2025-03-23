@@ -3,8 +3,10 @@ import { initWeightsFromLayerNeuronCounts } from "../utils/utils";
 let width;
 let height;
 let ctx;
-const WeightsGraph = ({ weights, layerNeuronCounts }) => {
+let animationFrameId;
+const WeightsGraph = ({ weights, layerNeuronCounts, loading }) => {
 	const canvasRef = useRef(null);
+	const loadingRef = useRef(loading);
 	const computeNeuronPositions = (layerNeuronCounts) => {
 		const neuronPositions = [];
 		let numLayers = layerNeuronCounts.length;
@@ -36,7 +38,12 @@ const WeightsGraph = ({ weights, layerNeuronCounts }) => {
 		return neuronPositions;
 		// Draw connections (weights) between layers.
 	};
-	const drawWeights = (weights, neuronPositions) => {
+	const drawWeights = (
+		weights,
+		neuronPositions,
+		colorPositive = "255, 0, 0",
+		colorNegative = "0, 0, 255"
+	) => {
 		if (weights.length === 0) {
 			weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
 		}
@@ -66,8 +73,8 @@ const WeightsGraph = ({ weights, layerNeuronCounts }) => {
 					// Set stroke color based on sign: blue for positive, red for negative.
 					ctx.strokeStyle =
 						weight >= 0
-							? `rgba(0, 0, 255, ${clampedOpacity})`
-							: `rgba(255, 0, 0, ${clampedOpacity})`;
+							? `rgba(${colorPositive}, ${clampedOpacity})`
+							: `rgba(${colorNegative}, ${clampedOpacity})`;
 					// Line thickness scales less aggressively now.
 					ctx.lineWidth = 0.1 + Math.abs(clampedOpacity) * 1.1;
 					ctx.stroke();
@@ -75,28 +82,75 @@ const WeightsGraph = ({ weights, layerNeuronCounts }) => {
 			}
 		}
 	};
+	const animate = () => {
+		if (!loadingRef.current) return;
+		// console.log(loading);
+		ctx.clearRect(0, 0, width, height);
+		const neuronPositions = computeNeuronPositions(layerNeuronCounts);
+		weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
+
+		const jitteredWeights = weights.map((matrix) =>
+			matrix.map(
+				(row) => row.map((w) => w + (Math.random() - 0.5) * 0.1) // Adjust 0.1 for more/less jitter
+			)
+		);
+
+		// Draw weights using jittered values when loading, else use normal weights.
+		drawWeights(loading ? jitteredWeights : weights, neuronPositions);
+		drawNeurons(neuronPositions, layerNeuronCounts);
+
+		animationFrameId;
+
+		if (loadingRef.current) {
+			// Here we add a timeout before scheduling the next frame.
+			setTimeout(() => {
+				animationFrameId = requestAnimationFrame(animate);
+			}, 500); // delay in milliseconds
+		}
+	};
 	useEffect(() => {
 		const canvas = canvasRef.current;
+		loadingRef.current = loading;
+
 		if (!canvas) return;
 		ctx = canvas.getContext("2d");
 		width = canvas.width;
 		height = canvas.height;
 
-		ctx.clearRect(0, 0, width, height); // Clear the canvas
-		const neuronPositions = computeNeuronPositions(layerNeuronCounts);
-		drawWeights(weights, neuronPositions);
-		drawNeurons(neuronPositions, layerNeuronCounts);
+		if (loading == true) {
+			// animate the weights instead of drawing normally
+			animate();
+		} else {
+			// perform a normal draw
+			let weightsMUTABLE = weights;
+			if (weights.length === 0) {
+				weightsMUTABLE =
+					initWeightsFromLayerNeuronCounts(layerNeuronCounts);
+			}
 
+			ctx.clearRect(0, 0, width, height); // Clear the canvas
+			const neuronPositions = computeNeuronPositions(layerNeuronCounts);
+			drawWeights(weightsMUTABLE, neuronPositions);
+			drawNeurons(neuronPositions, layerNeuronCounts);
+		}
 		// Force deep checking of weights by using JSON.stringify
-	}, [JSON.stringify(weights)]);
+		return () => cancelAnimationFrame(animationFrameId);
+	}, [loading, JSON.stringify(weights), layerNeuronCounts]);
 
 	return (
-		<canvas
-			ref={canvasRef}
-			width={1300}
-			height={900}
-			style={{ border: "1px solid #ccc" }}
-		/>
+		<>
+			{loading == true ? (
+				<div>Loading numpy...Should only take a few seconds❤️</div>
+			) : (
+				<div>Ready to train!{loading}</div>
+			)}
+			<canvas
+				ref={canvasRef}
+				width={1300}
+				height={900}
+				style={{ border: "1px solid #ccc" }}
+			/>
+		</>
 	);
 };
 

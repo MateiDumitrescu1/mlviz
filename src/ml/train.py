@@ -1,5 +1,5 @@
 from js import postMessage
-# import time
+import time
 def get_weights(model):
     layers = model.layers
     weights = []
@@ -12,11 +12,11 @@ def get_weights(model):
     return weights,biases
 
 # train 1 epoch
-model_obj_global.train(x_train_global, y_train_global, epochs=1, lr=learning_rate_global)
-predictions_global = model_obj_global.forward(x_train_global)
-prediction_list = predictions_global.tolist()
-send_weights, send_biases = get_weights(model_obj_global)
 
+if epochNr >=1:
+    model_obj_global.train(x_train_global, y_train_global, epochs=1, lr=learning_rate_global)
+if epochNr ==1:
+    time.sleep(0.6) # pause a bit to see the initial weights and predictions
 
 def encode_predictions_to_string(predictions):
     encoded_string = "p"
@@ -38,6 +38,9 @@ def convert_weights_to_string(weights):
         rez = rez + "#"
     return rez
 
+predictions_global = model_obj_global.forward(x_train_global)
+prediction_list = predictions_global.tolist()
+send_weights, send_biases = get_weights(model_obj_global)
 string_to_send = convert_weights_to_string(send_weights)
 prediction_string_to_send = encode_predictions_to_string(prediction_list)
 postMessage(string_to_send)
