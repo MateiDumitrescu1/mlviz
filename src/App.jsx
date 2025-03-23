@@ -5,7 +5,7 @@ import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
 import { initWeightsFromLayerNeuronCounts } from "./utils/utils";
-
+import TaskSelectorDropdown from "./components/TaskSelectorDropdown";
 const decodeString_weights = (encodedString) => {
 	// split on # to get the layers
 	// split each layer on | to get the neuron weights
@@ -47,7 +47,24 @@ function App() {
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [ready, setReady] = useState(false);
+	const taskOptions = [
+		{ value: "iris", label: "Iris" },
+		{ value: "dummy", label: "Dummy example" },
+	];
+	const [selectedTask, setSelectedTask] = useState(taskOptions[0]);
+
+	const handleSelectTask = (task) => {
+		setSelectedTask(task);
+		if (task.value === "iris") {
+			setLayerNeuronCounts([4, 10, 10, 3]);
+		} else if (task.value === "dummy") {
+			setLayerNeuronCounts([5, 10, 10, 7]);
+		}
+		// You can perform additional actions with the selected option here
+		console.log(`Selected task: ${task.label}`);
+	};
 	const run = async () => {
+		// send the model parameters in the event data here
 		setReady(false);
 		console.log("calling startTraining");
 		await startTraining("Hello");
@@ -89,6 +106,17 @@ function App() {
 			>
 				Start Training
 			</button>
+			<div>
+				Select a ML task. Currently set to{" "}
+				{selectedTask ? selectedTask.label : "None"}
+			</div>
+			<TaskSelectorDropdown
+				options={taskOptions}
+				defaultOption={taskOptions[0]}
+				onOptionSelect={handleSelectTask}
+				placeholder="Select a framework"
+				style={{ marginBottom: "16px" }}
+			/>
 			<WeightsGraph
 				weights={decodedWeights}
 				layerNeuronCounts={layerNeuronCounts}
