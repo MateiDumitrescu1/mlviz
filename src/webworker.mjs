@@ -18,13 +18,57 @@ const getPythonCode = async (file) => {
 };
 self.addEventListener("message", async (event) => {
 	const networkLayout = event.data.networkLayout;
+	await pyodide.globals.set("NNlayout", networkLayout);
+
+	//* create and set the list of activation functions
+	let activationFunctions = [];
+	for (let i = 1; i < networkLayout.length; i++) {
+		if (i === networkLayout.length - 1) {
+			activationFunctions.push("softmax");
+		} else {
+			activationFunctions.push("tanh");
+		}
+	}
+	await pyodide.globals.set("NNactivations", activationFunctions);
+
+	//* set the loss function parameter
+	const lossFunction = "categorical_cross_entropy";
+	await pyodide.globals.set("NNloss", lossFunction);
+	//* set the ML task
 	const task = event.data.task;
-	const dataset = event.data.dataset;
-	console.log("received dataset, printing from webworker", dataset);
-	console.log("starting training, printing from webworker");
-	// console.log(networkLayout);
-	// console.log(task);
 	await pyodide.globals.set("taskSelected", task);
+	//* read the dataset: features and labels
+	const dataset = event.data.dataset;
+	const features = dataset[0];
+	const labels = dataset[1];
+	// train test data
+	let x_train, y_train, x_test, y_test;
+	if (task === "iris") {
+		//* split the data into train and test
+		const trainFraction = 0.8; //TODO make this a parameter in the frontend and pass it as a message
+		const trainLastIndex = Math.floor(features.length * trainFraction);
+		x_train = features.slice(0, trainLastIndex);
+		y_train = labels.slice(0, trainLastIndex);
+		x_test = features.slice(trainLastIndex);
+		y_test = labels.slice(trainLastIndex);
+	} else if (task === "dummy") {
+		// for the dummy example we test on the training data
+		x_train = features;
+		y_train = labels;
+		x_test = features;
+		y_test = labels;
+	}
+	//* set the global variables
+	await pyodide.globals.set("x_train_global", x_train);
+	await pyodide.globals.set("y_train_global", y_train);
+	await pyodide.globals.set("x_test_global", x_test);
+	await pyodide.globals.set("y_test_global", y_test);
+	// console.log("printing the features from webworker", features);
+	// console.log("printing the labels from webworker", labels);
+	// console.log("printing the layout from webworker", networkLayout);
+	// console.log(task);
+	//* set the learning rate
+	await pyodide.globals.set("learning_rate_global", 1);
 	// get the hode
 	let initModelCode = await getPythonCode("init_model.py");
 	let trainCode = await getPythonCode("train.py");

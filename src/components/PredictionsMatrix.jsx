@@ -28,6 +28,7 @@ const PredictionsMatrix = ({ predictions, fallback, title }) => {
 			);
 		}
 	} else {
+		// console.log(predictions);
 		// predictionsMUTABLE = convert(predictionsMUTABLE);
 	}
 

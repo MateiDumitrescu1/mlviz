@@ -163,19 +163,13 @@ class NN:
             output = self.forward(X)
             # print("output", output)
             self.backward(X, Y, output, lr)
-def create_model_and_task_dummy():
-    X_dummy = np.random.randn(5, 10)  # 5 features, 10 examples.
-    Y_dummy = np.zeros((7, 10))
-    for i in range(10):
-        cls = np.random.randint(0, 7)
-        Y_dummy[cls, i] = 1 # one-hot encoding
-    
+def create_model():    
     # define the model        
-    model = NN([5, 10, 10, 7], activations=['tanh', 'tanh','softmax'], loss='categorical_cross_entropy')
-    # define the learning rate
-    learning_rate = 1
-    return model,X_dummy,Y_dummy,learning_rate
-if taskSelected == "dummy":
-    model_obj_global,x_train_global,y_train_global,learning_rate_global = create_model_and_task_dummy()
-elif taskSelected == "iris":
-    pass
+    model = NN(NNlayout, activations=NNactivations, loss=NNloss)
+    return model
+
+# conver to np array
+x_train_global = np.array(x_train_global)
+y_train_global = np.array(y_train_global)
+
+model_obj_global = create_model()

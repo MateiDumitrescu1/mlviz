@@ -171,12 +171,12 @@ function App() {
 			<PredictionsMatrix
 				predictions={dummyDataLabels}
 				fallback={undefined}
-				title={"True Labels"}
+				title={"True Labels (One-hot encoded)"}
 			/>
 			<PredictionsMatrix
 				predictions={decodedPredictions}
 				fallback={dummyDataLabels}
-				title={"Predictions"}
+				title={"Predictions (One-hot encoded)"}
 			/>
 		</>
 	);
