@@ -1,8 +1,34 @@
 import React from "react";
+const convert = (predictions) => {
+	// check if predictions are one-hot encoded
+	// console.log("Type of predictions:", typeof predictions);
+	// console.log("predictiosn from matrix clg", predictions);
+	// console.log("predictions[0]", predictions[0]);
+	const isOneHotEncoded = predictions[0].length > 1;
 
-const PredictionsMatrix = ({ predictions }) => {
-	if (!predictions || predictions.length === 0) {
-		return <div>No predictions available.</div>;
+	if (isOneHotEncoded) {
+		// convert one-hot encoded predictions to class labels
+		return predictions.map((row) => row.indexOf(Math.max(...row)));
+	}
+};
+const PredictionsMatrix = ({ predictions, fallback, title }) => {
+	let predictionsMUTABLE = predictions;
+	if (!predictionsMUTABLE || predictionsMUTABLE.length === 0) {
+		if (!fallback || fallback.length === 0 || fallback == undefined) {
+			throw new Error(
+				"No predictions or fallback data available. The prediction data should have been set."
+			);
+		} else {
+			predictionsMUTABLE = fallback;
+			// predictionsMUTABLE = convert(predictionsMUTABLE);
+			// console.log("sdasdada");
+			// zero out every entry in the matrix
+			predictionsMUTABLE = predictionsMUTABLE.map((row) =>
+				row.map(() => 0)
+			);
+		}
+	} else {
+		// predictionsMUTABLE = convert(predictionsMUTABLE);
 	}
 
 	// Interpolate between blue (0: rgb(0, 0, 255)) and yellow (1: rgb(255, 255, 0))
@@ -18,7 +44,8 @@ const PredictionsMatrix = ({ predictions }) => {
 	// Render a grid where each cell is a square
 	return (
 		<div style={{ display: "inline-block", border: "1px solid #ccc" }}>
-			{predictions.map((row, rowIndex) => (
+			<div>{title}</div>
+			{predictionsMUTABLE.map((row, rowIndex) => (
 				<div key={rowIndex} style={{ display: "flex" }}>
 					{row.map((cell, cellIndex) => (
 						<div

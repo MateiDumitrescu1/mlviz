@@ -163,7 +163,7 @@ class NN:
             output = self.forward(X)
             # print("output", output)
             self.backward(X, Y, output, lr)
-def create_model():
+def create_model_and_task_dummy():
     X_dummy = np.random.randn(5, 10)  # 5 features, 10 examples.
     Y_dummy = np.zeros((7, 10))
     for i in range(10):
@@ -175,5 +175,7 @@ def create_model():
     # define the learning rate
     learning_rate = 1
     return model,X_dummy,Y_dummy,learning_rate
-
-model_obj_global,x_train_global,y_train_global,learning_rate_global = create_model()
+if taskSelected == "dummy":
+    model_obj_global,x_train_global,y_train_global,learning_rate_global = create_model_and_task_dummy()
+elif taskSelected == "iris":
+    pass

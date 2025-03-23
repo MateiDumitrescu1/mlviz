@@ -6,6 +6,44 @@ import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
 import { initWeightsFromLayerNeuronCounts } from "./utils/utils";
 import TaskSelectorDropdown from "./components/TaskSelectorDropdown";
+import { loadCSV } from "./utils/utils";
+import Papa from "papaparse";
+
+const loadCSVFile = async (path) => {
+	// function to read the dataset files from the /public directory
+	return fetch(path)
+		.then((response) => response.text())
+		.then((csvText) => {
+			const result = Papa.parse(csvText, {
+				header: false,
+				dynamicTyping: true,
+				skipEmptyLines: true,
+			});
+			// console.log(result);
+			return result.data;
+		})
+		.catch((error) => console.error("Error loading CSV:", error));
+};
+
+// read the dummy multiclassification dataset
+const dummyDataFeatures = await loadCSVFile("./ml_data/Dummy_features.csv");
+const dummyDataLabels = await loadCSVFile("./ml_data/Dummy_labels.csv");
+// read the iris dataset
+const irisDataFeatures = await loadCSVFile("./ml_data/Iris_features.csv");
+const irisDataLabels = await loadCSVFile("./ml_data/Iris_labels.csv");
+// console.log(irisDataFeatures);
+const returnDatasetBasedOnTask = (task) => {
+	// given a task name, return the corresponding dataset
+	// this is implemented for convenience
+	if (task == null || task == undefined || task === "")
+		return [dummyDataFeatures, dummyDataLabels];
+	if (task === "iris") {
+		return [irisDataFeatures, irisDataLabels];
+	} else if (task === "dummy") {
+		return [dummyDataFeatures, dummyDataLabels];
+	}
+};
+
 const decodeString_weights = (encodedString) => {
 	// split on # to get the layers
 	// split each layer on | to get the neuron weights
@@ -46,28 +84,36 @@ function App() {
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([5, 10, 10, 7]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const datasetRef = useRef(null);
 	const [ready, setReady] = useState(false);
 	const taskOptions = [
 		{ value: "iris", label: "Iris" },
 		{ value: "dummy", label: "Dummy example" },
 	];
-	const [selectedTask, setSelectedTask] = useState(taskOptions[0]);
-
+	const [selectedTask, setSelectedTask] = useState(taskOptions[1]);
 	const handleSelectTask = (task) => {
+		// method to pass to the dropdown menu, to select the task
 		setSelectedTask(task);
+		// change network configuration based on the selected task (input and output layers)
 		if (task.value === "iris") {
 			setLayerNeuronCounts([4, 10, 10, 3]);
 		} else if (task.value === "dummy") {
 			setLayerNeuronCounts([5, 10, 10, 7]);
 		}
 		// You can perform additional actions with the selected option here
-		console.log(`Selected task: ${task.label}`);
+		// console.log(`Selected task: ${task.label}`);
 	};
 	const run = async () => {
 		// send the model parameters in the event data here
 		setReady(false);
+		datasetRef.current = returnDatasetBasedOnTask(selectedTask.value);
+		// console.log(datasetRef.current);
 		console.log("calling startTraining");
-		await startTraining("Hello");
+		await startTraining({
+			networkLayout: layerNeuronCounts,
+			task: selectedTask.value,
+			dataset: datasetRef.current,
+		});
 	};
 	const handleWeightUpdate = (event) => {
 		let string = event.data;
@@ -112,7 +158,7 @@ function App() {
 			</div>
 			<TaskSelectorDropdown
 				options={taskOptions}
-				defaultOption={taskOptions[0]}
+				defaultOption={taskOptions[1]}
 				onOptionSelect={handleSelectTask}
 				placeholder="Select a framework"
 				style={{ marginBottom: "16px" }}
@@ -122,7 +168,16 @@ function App() {
 				layerNeuronCounts={layerNeuronCounts}
 				loading={loading}
 			/>
-			<PredictionsMatrix predictions={decodedPredictions} />
+			<PredictionsMatrix
+				predictions={dummyDataLabels}
+				fallback={undefined}
+				title={"True Labels"}
+			/>
+			<PredictionsMatrix
+				predictions={decodedPredictions}
+				fallback={dummyDataLabels}
+				title={"Predictions"}
+			/>
 		</>
 	);
 }

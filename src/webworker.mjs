@@ -17,8 +17,14 @@ const getPythonCode = async (file) => {
 	return pythonScript;
 };
 self.addEventListener("message", async (event) => {
-	console.log("starting training");
-
+	const networkLayout = event.data.networkLayout;
+	const task = event.data.task;
+	const dataset = event.data.dataset;
+	console.log("received dataset, printing from webworker", dataset);
+	console.log("starting training, printing from webworker");
+	// console.log(networkLayout);
+	// console.log(task);
+	await pyodide.globals.set("taskSelected", task);
 	// get the hode
 	let initModelCode = await getPythonCode("init_model.py");
 	let trainCode = await getPythonCode("train.py");
