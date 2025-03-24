@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
-import { startTraining, onWorkerMessageExecute } from "./workerApi.mjs";
+import { startTraining, onWorkerMessageExecute } from "./workerApi.js";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";

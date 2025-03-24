@@ -7,7 +7,7 @@ const IRIS_CLASSES = ["Setosa", "Versicolor", "Virginica"];
 //* the passed in predictions parameter should be a matrix
 //* the passed in true labels should be 1-hot
 const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
-	console.log("dsasda!!", samples);
+	// console.log("dsasda!!", samples);
 	//TODO check if the predictions array matches the trueLabels array.
 
 	// if it doesn't there are mp predictions yet, just render the test data
