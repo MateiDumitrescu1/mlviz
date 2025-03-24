@@ -55,7 +55,11 @@ self.addEventListener("message", async (event) => {
 	// console.log("printing the layout from webworker", networkLayout);
 	// console.log(task);
 	//* set the learning rate
-	await pyodide.globals.set("learning_rate_global", 1);
+	if (task === "iris") {
+		await pyodide.globals.set("learning_rate_global", 0.1);
+	} else if (task === "dummy") {
+		await pyodide.globals.set("learning_rate_global", 1);
+	}
 	// get the hode
 	let initModelCode = await getPythonCode("init_model.py");
 	let trainCode = await getPythonCode("train.py");
@@ -69,6 +73,7 @@ self.addEventListener("message", async (event) => {
 	let updatedPredictions;
 	try {
 		for (let i = 0; i <= epochs; i++) {
+			// console.log("epochNr", i);
 			await pyodide.globals.set("epochNr", i);
 
 			// const runScript = `i=${i};${pythonScript}`;

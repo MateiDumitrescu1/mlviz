@@ -4,7 +4,7 @@
 
 #--------
 import numpy as np
-np.random.seed(0)
+np.random.seed(2321)
 
 
 def sigmoid(z):
@@ -171,5 +171,13 @@ def create_model():
 # conver to np array
 x_train_global = np.array(x_train_global)
 y_train_global = np.array(y_train_global)
+x_test_global = np.array(x_test_global)
+y_test_global = np.array(y_test_global)
+
+if taskSelected == "iris": # we need to 
+    x_train_global = x_train_global.T
+    y_train_global = y_train_global.T
+    x_test_global = x_test_global.T
+    y_test_global = y_test_global.T
 
 model_obj_global = create_model()

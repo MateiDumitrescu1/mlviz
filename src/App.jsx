@@ -126,7 +126,7 @@ function App() {
 		initDataRefsBasedOnTask(task.value);
 		// change network configuration based on the selected task (input and output layers)
 		if (task.value === "iris") {
-			setLayerNeuronCounts([4, 10, 10, 3]);
+			setLayerNeuronCounts([4, 5, 3]);
 		} else if (task.value === "dummy") {
 			setLayerNeuronCounts([5, 10, 10, 7]);
 		}

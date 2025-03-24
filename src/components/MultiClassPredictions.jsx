@@ -6,20 +6,29 @@ const IRIS_CLASSES = ["Setosa", "Versicolor", "Virginica"];
 
 const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 	// Calculate accuracy
-	const accuracy = useMemo(() => {
-		if (!predictions || predictions.length === 0) return 0;
+	let predictionsMUTABLE = predictions;
+	if (predictions && predictions.length !== 0) {
+		// reverse the dimension of the predictions matrix
+		predictionsMUTABLE = predictions[0].map((_, colIndex) =>
+			predictions.map((row) => row[colIndex])
+		);
+	}
 
+	const accuracy = useMemo(() => {
+		if (!predictionsMUTABLE || predictionsMUTABLE.length === 0) return 0;
+		// console.log("loggin from MultiClassPredictions.jsx", predictions);
 		let correct = 0;
 		for (let i = 0; i < trueLabels.length; i++) {
 			const trueClass = trueLabels[i].indexOf(Math.max(...trueLabels[i]));
-			const predClass = predictions[i].indexOf(
-				Math.max(...predictions[i])
+			// console.log("sadasda", predictions[i]);
+			const predClass = predictionsMUTABLE[i].indexOf(
+				Math.max(...predictionsMUTABLE[i])
 			);
 			if (trueClass === predClass) correct++;
 		}
 
 		return (correct / trueLabels.length) * 100;
-	}, [trueLabels, predictions]);
+	}, [trueLabels, predictionsMUTABLE]);
 
 	// Helper function to get class name from one-hot vector
 	const getClassName = (oneHotVector) => {
@@ -35,7 +44,7 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 				<div className={styles.accuracyContainer}>
 					<span className={styles.accuracyLabel}>Accuracy:</span>
 					<span className={styles.accuracyValue}>
-						{predictions.length > 0
+						{predictionsMUTABLE.length > 0
 							? `${accuracy.toFixed(2)}%`
 							: "No predictions yet"}
 					</span>
@@ -65,8 +74,8 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 					<tbody>
 						{samples.map((sample, index) => {
 							const trueClass = getClassName(trueLabels[index]);
-							const predClass = predictions[index]
-								? getClassName(predictions[index])
+							const predClass = predictionsMUTABLE[index]
+								? getClassName(predictionsMUTABLE[index])
 								: "#";
 							const isCorrect =
 								trueClass === predClass && predClass !== "#";
