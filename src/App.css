@@ -1,20 +1,33 @@
 #root {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
+    margin: 0rem;
+    padding: 0rem;
     text-align: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    a:nth-of-type(2) .logo {
-        animation: logo-spin infinite 20s linear;
-    }
+.mainContainer {
+    display: flex;
+    place-items: center;
+    justify-content: center;
 }
 
-.card {
-    padding: 2em;
+.AppContainer {
+    display: flex;
+    flex-direction: row;
+    margin-left: 2.5rem;
+    margin-top: 5rem;
+    /* align-items: center; */
+    /* justify-content: center; */
 }
 
-.read-the-docs {
-    color: #888;
+.predictionsContainer {
+    margin-left: 2.5rem;
+}
+
+.predictionsHeatmapContainer {
+    /* margin-left: 5rem; */
+    margin-top: 10rem;
+}
+
+.MCpredictionsContainer {
+    margin-top: -2rem;
 }

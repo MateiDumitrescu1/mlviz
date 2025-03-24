@@ -4,7 +4,7 @@
 
 #--------
 import numpy as np
-np.random.seed(2321)
+np.random.seed(0)
 
 
 def sigmoid(z):
@@ -175,6 +175,7 @@ x_test_global = np.array(x_test_global)
 y_test_global = np.array(y_test_global)
 
 if taskSelected == "iris": # we need to 
+    np.random.seed(2321)
     x_train_global = x_train_global.T
     y_train_global = y_train_global.T
     x_test_global = x_test_global.T

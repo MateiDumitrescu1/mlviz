@@ -4,7 +4,13 @@ import styles from "../components_styles/MultiClassPredictions.module.scss";
 // Class names for the IRIS dataset
 const IRIS_CLASSES = ["Setosa", "Versicolor", "Virginica"];
 
+//* the passed in predictions parameter should be a matrix
+//* the passed in true labels should be 1-hot
 const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
+	console.log("dsasda!!", samples);
+	//TODO check if the predictions array matches the trueLabels array.
+
+	// if it doesn't there are mp predictions yet, just render the test data
 	// Calculate accuracy
 	let predictionsMUTABLE = predictions;
 	if (predictions && predictions.length !== 0) {
@@ -16,6 +22,7 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 
 	const accuracy = useMemo(() => {
 		if (!predictionsMUTABLE || predictionsMUTABLE.length === 0) return 0;
+		if (predictionsMUTABLE.length !== trueLabels.length) return 0;
 		// console.log("loggin from MultiClassPredictions.jsx", predictions);
 		let correct = 0;
 		for (let i = 0; i < trueLabels.length; i++) {

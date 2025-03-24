@@ -8,11 +8,14 @@ const WeightsGraph = ({ weights, layerNeuronCounts, loading }) => {
 	const canvasRef = useRef(null);
 	const loadingRef = useRef(loading);
 	const computeNeuronPositions = (layerNeuronCounts) => {
-		const neuronPositions = [];
 		let numLayers = layerNeuronCounts.length;
+		const leftOffest = 100; // the offeset on the right will have the same value
+		const layerGap = (width - 2 * leftOffest) / (numLayers - 1);
+		const neuronPositions = [];
+
 		for (let layer = 0; layer < numLayers; layer++) {
 			const count = layerNeuronCounts[layer];
-			const x = ((layer + 1) * width) / (numLayers + 1);
+			const x = leftOffest + layer * layerGap;
 			const positions = [];
 			for (let i = 0; i < count; i++) {
 				const y = ((i + 1) * height) / (count + 1);
@@ -146,7 +149,7 @@ const WeightsGraph = ({ weights, layerNeuronCounts, loading }) => {
 			)}
 			<canvas
 				ref={canvasRef}
-				width={1300}
+				width={800}
 				height={900}
 				style={{ border: "1px solid #ccc" }}
 			/>

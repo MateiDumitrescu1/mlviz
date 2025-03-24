@@ -42,7 +42,8 @@ const returnDatasetBasedOnTask = (task) => {
 	// given a task name, return the corresponding dataset
 	// this is implemented for convenience
 	if (task == null || task == undefined || task === "")
-		return [dummyDataFeatures, dummyDataLabels];
+		// in case there was an error, return the default dataset, which is iris
+		return [irisDataFeatures, irisDataLabels];
 	if (task === "iris") {
 		return [irisDataFeatures, irisDataLabels];
 	} else if (task === "dummy") {
@@ -87,7 +88,7 @@ const decodeString_predictions = (encodedString) => {
 
 function App() {
 	const [decodedWeights, setDecodedWeights] = useState([]);
-	const [layerNeuronCounts, setLayerNeuronCounts] = useState([5, 10, 10, 7]);
+	const [layerNeuronCounts, setLayerNeuronCounts] = useState([4, 5, 3]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
 	const [xtest, setXtest] = useState([]);
 	const [ytest, setYtest] = useState([]);
@@ -99,6 +100,7 @@ function App() {
 	const xtestRef = useRef(null);
 	const ytestRef = useRef(null);
 	const initDataRefsBasedOnTask = (taskValue) => {
+		// console.log("executed this");
 		datasetRef.current = returnDatasetBasedOnTask(taskValue);
 		const split_result = train_test_split(
 			taskValue,
@@ -110,20 +112,27 @@ function App() {
 		xtestRef.current = split_result[2];
 		ytestRef.current = split_result[3];
 		// console.log(xtestRef.current);
+		// console.log("sdad", xtestRef.current);
 	};
 	// ready, loading
 	const [ready, setReady] = useState(false);
 	const [loading, setLoading] = useState(true);
 	// task selection options
 	const taskOptions = [
-		{ value: "iris", label: "Iris" },
-		{ value: "dummy", label: "Dummy example" },
+		{ value: "iris", label: "Iris Dataset" },
+		{ value: "dummy", label: "Basic 7-label classification" },
 	];
-	const [selectedTask, setSelectedTask] = useState(taskOptions[1]);
+	const defaultTaskIndex = 0;
+	//
+	const [selectedTask, setSelectedTask] = useState(
+		taskOptions[defaultTaskIndex]
+	);
 	const handleSelectTask = (task) => {
 		// method to pass to the dropdown menu, to select the task
 		setSelectedTask(task);
 		initDataRefsBasedOnTask(task.value);
+		setDecodedWeights([]); // reset the weights
+		setDecodedPredictions([]); // reset the predictions
 		// change network configuration based on the selected task (input and output layers)
 		if (task.value === "iris") {
 			setLayerNeuronCounts([4, 5, 3]);
@@ -133,9 +142,10 @@ function App() {
 	};
 	const run = async () => {
 		// send the model parameters in the event data here
-		setReady(false);
+
 		initDataRefsBasedOnTask(selectedTask.value);
-		console.log("calling startTraining");
+		setReady(false);
+		// console.log("calling startTraining");
 		await startTraining({
 			networkLayout: layerNeuronCounts,
 			task: selectedTask.value,
@@ -176,59 +186,72 @@ function App() {
 		}
 	};
 	useEffect(() => {
+		// console.log("use effect executed");
+		initDataRefsBasedOnTask(selectedTask.value);
 		if (decodedWeights == []) {
 			const weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
 			setDecodedWeights(weights);
 		}
 		onWorkerMessageExecute(handleWeightUpdate);
-	}, []);
+	}, [selectedTask, irisDataFeatures]);
+	// initDataRefsBasedOnTask(selectedTask.value);
 	return (
-		<>
-			<button
-				onClick={run}
-				disabled={loading == true || ready == false}
-				style={{ backgroundColor: loading ? "gray" : "initial" }}
-			>
-				Start Training
-			</button>
-			<div>
-				Select a ML task. Currently set to{" "}
-				{selectedTask ? selectedTask.label : "None"}
+		<div className="mainContainer">
+			<div className="AppContainer">
+				<div>
+					<button
+						onClick={run}
+						disabled={loading == true || ready == false}
+						style={{
+							backgroundColor: loading ? "gray" : "initial",
+						}}
+					>
+						Start Training
+					</button>
+					<div>
+						Select a ML task. Currently set to{" "}
+						{selectedTask ? selectedTask.label : "None"}
+					</div>
+					<TaskSelectorDropdown
+						options={taskOptions}
+						defaultOption={taskOptions[defaultTaskIndex]}
+						onOptionSelect={handleSelectTask}
+						placeholder="Select a framework"
+						style={{ marginBottom: "16px" }}
+					/>
+					<WeightsGraph
+						weights={decodedWeights}
+						layerNeuronCounts={layerNeuronCounts}
+						loading={loading}
+					/>
+				</div>
+				<div className="predictionsContainer">
+					{selectedTask.value === "dummy" && (
+						<div className="predictionsHeatmapContainer">
+							<PredictionsMatrix
+								predictions={dummyDataLabels}
+								fallback={undefined}
+								title={"True Labels (One-hot encoded)"}
+							/>
+							<PredictionsMatrix
+								predictions={decodedPredictions}
+								fallback={dummyDataLabels}
+								title={"Predictions (One-hot encoded)"}
+							/>
+						</div>
+					)}
+					{selectedTask.value === "iris" && xtestRef.current && (
+						<div className="MCpredictionsContainer">
+							<MultiClassPredictions
+								samples={xtestRef.current}
+								trueLabels={ytestRef.current}
+								predictions={decodedPredictions}
+							/>
+						</div>
+					)}
+				</div>
 			</div>
-			<TaskSelectorDropdown
-				options={taskOptions}
-				defaultOption={taskOptions[1]}
-				onOptionSelect={handleSelectTask}
-				placeholder="Select a framework"
-				style={{ marginBottom: "16px" }}
-			/>
-			<WeightsGraph
-				weights={decodedWeights}
-				layerNeuronCounts={layerNeuronCounts}
-				loading={loading}
-			/>
-			{selectedTask.value === "dummy" && (
-				<>
-					<PredictionsMatrix
-						predictions={dummyDataLabels}
-						fallback={undefined}
-						title={"True Labels (One-hot encoded)"}
-					/>
-					<PredictionsMatrix
-						predictions={decodedPredictions}
-						fallback={dummyDataLabels}
-						title={"Predictions (One-hot encoded)"}
-					/>
-				</>
-			)}
-			{selectedTask.value === "iris" && (
-				<MultiClassPredictions
-					samples={xtestRef.current}
-					trueLabels={ytestRef.current}
-					predictions={decodedPredictions}
-				/>
-			)}
-		</>
+		</div>
 	);
 }
 

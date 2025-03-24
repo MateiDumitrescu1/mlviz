@@ -106,3 +106,15 @@ function shuffleInSync(features, labels) {
 
 	return [featuresMUTABLE, labelsMUTABLE];
 }
+
+/**
+ * Check if an object is a mtrix or not
+ * @param {*} matrix
+ * @returns
+ */
+export const checkIsMatrix = (matrix) => {
+	if (matrix == null || matrix == undefined) return false;
+	if (!Array.isArray(matrix)) return false;
+	if (matrix.length === 0) return false;
+	return matrix.every((row) => Array.isArray(row));
+};
