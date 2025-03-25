@@ -19,12 +19,25 @@
 .SimulationContainer {
     display: flex;
     flex-direction: column;
+    position: relative;
     margin: 2.5rem;
 }
+
 
 .ControlContainer {
     display: flex;
     flex-direction: row;
+    position: relative;
+    min-width: 20rem;
+    max-width: 40%;
+    height: 2.5rem;
+    /* margin-top: 1rem; */
+    margin-bottom: 1rem;
+
+    .startButton {
+        text-align: center;
+        min-width: 9rem;
+    }
 }
 
 .VisualizationContainer {

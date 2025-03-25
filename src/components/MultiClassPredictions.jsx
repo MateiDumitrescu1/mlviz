@@ -73,8 +73,8 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 							<th>Sepal Width</th>
 							<th>Petal Length</th>
 							<th>Petal Width</th>
-							<th>True Label</th>
-							<th>Predicted</th>
+							<th className={styles.wider}>True Label</th>
+							<th className={styles.wider}>Predicted</th>
 							<th>Result</th>
 						</tr>
 					</thead>
@@ -94,12 +94,12 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 									<td>{sample[1].toFixed(1)}</td>
 									<td>{sample[2].toFixed(1)}</td>
 									<td>{sample[3].toFixed(1)}</td>
-									<td>
+									<td className={styles.wider}>
 										<span className={styles.label}>
 											{trueClass}
 										</span>
 									</td>
-									<td>
+									<td className={styles.wider}>
 										{predClass === "#" ? (
 											<span
 												className={
@@ -123,7 +123,7 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 									<td>
 										{predClass !== "#" && (
 											<span className={styles.resultIcon}>
-												{isCorrect ? "✓" : "✗"}
+												{isCorrect ? "✅" : "❌"}
 											</span>
 										)}
 									</td>

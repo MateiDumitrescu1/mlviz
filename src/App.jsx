@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import "./App.css";
+import "./App.scss";
 import { startTraining, onWorkerMessageExecute } from "./workerApi.js";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
@@ -92,6 +92,11 @@ function App() {
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([4, 5, 3]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
 
+	// more control states
+	const [trainingNumberOfEpochs, setTrainingNumberOfEpochs] = useState(100);
+	const [epochSelectedFromReplayBar, setEpochSelectedFromReplayBar] =
+		useState(null);
+
 	//data refs and methods
 	const datasetRef = useRef(null);
 	const xtrainRef = useRef(null);
@@ -183,9 +188,11 @@ function App() {
 			const all_weights_decoded = decodeString_weights(string);
 			// console.log(all_weights_decoded);
 			setDecodedWeights(all_weights_decoded);
+			//TODO this should be a ref, so there is no rerender triggered. the ref should be passed into the WeightsGraph component
 		} else if (firstChar === "p") {
 			const all_predictions_decoded = decodeString_predictions(string);
 			setDecodedPredictions(all_predictions_decoded);
+			//TODO same as for weights, this should be a ref
 			// console.log(all_predictions_decoded);
 		}
 	};
@@ -212,6 +219,7 @@ function App() {
 			<div className="SimulationContainer">
 				<div className="ControlContainer">
 					<button
+						className="startButton"
 						onClick={run}
 						disabled={loading == true || ready == false}
 						style={{
@@ -220,7 +228,11 @@ function App() {
 					>
 						Start Training
 					</button>
-					<ReplayBar displayAtCertainEpoch={displayAtCertainEpoch} />
+					<ReplayBar
+						displayAtCertainEpoch={displayAtCertainEpoch}
+						trainingEpochs={trainingNumberOfEpochs}
+						isTraining={!ready}
+					/>
 				</div>
 				<div className="VisualizationContainer">
 					<div>

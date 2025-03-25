@@ -2,6 +2,8 @@
 
     --background-color: rgb(33, 33, 33);
     --accent1: rgb(0, 177, 156);
+    --wrongEmojiRed: rgb(249, 47, 96);
+    --correctEmojiGreen: rgb(0, 119, 60);
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     color-scheme: light dark;
