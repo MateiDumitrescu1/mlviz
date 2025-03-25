@@ -2,21 +2,36 @@
     margin: 0rem;
     padding: 0rem;
     text-align: center;
+    width: 100vw;
+    position: relative;
 }
 
 .mainContainer {
+    position: relative;
     display: flex;
+    flex-direction: column;
     place-items: center;
-    justify-content: center;
+    place-content: center;
+    width: 100%;
+    overflow-x: hidden;
 }
 
-.AppContainer {
+.SimulationContainer {
+    display: flex;
+    flex-direction: column;
+    margin: 2.5rem;
+}
+
+.ControlContainer {
     display: flex;
     flex-direction: row;
-    margin-left: 2.5rem;
-    margin-top: 5rem;
-    /* align-items: center; */
-    /* justify-content: center; */
+}
+
+.VisualizationContainer {
+    position: relative;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: row;
 }
 
 .predictionsContainer {

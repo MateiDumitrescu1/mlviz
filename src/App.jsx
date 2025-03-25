@@ -4,13 +4,14 @@ import { startTraining, onWorkerMessageExecute } from "./workerApi.js";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
+import ReplayBar from "./components/ReplayBar.jsx";
 import {
 	initWeightsFromLayerNeuronCounts,
 	train_test_split,
 } from "./utils/utils";
 import TaskSelectorDropdown from "./components/TaskSelectorDropdown";
 import { loadCSV } from "./utils/utils";
-
+import SocialCorner from "./components/SocialCorner.jsx";
 import MultiClassPredictions from "./components/MultiClassPredictions";
 
 import Papa from "papaparse";
@@ -90,8 +91,6 @@ function App() {
 	const [decodedWeights, setDecodedWeights] = useState([]);
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([4, 5, 3]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
-	const [xtest, setXtest] = useState([]);
-	const [ytest, setYtest] = useState([]);
 
 	//data refs and methods
 	const datasetRef = useRef(null);
@@ -119,11 +118,11 @@ function App() {
 	const [loading, setLoading] = useState(true);
 	// task selection options
 	const taskOptions = [
-		{ value: "iris", label: "Iris Dataset" },
-		{ value: "dummy", label: "Basic 7-label classification" },
+		{ value: "iris", label: "TASK: Iris Dataset" },
+		{ value: "dummy", label: "TASK: Basic 7-label classification" },
 	];
 	const defaultTaskIndex = 0;
-	//
+	// selected task
 	const [selectedTask, setSelectedTask] = useState(
 		taskOptions[defaultTaskIndex]
 	);
@@ -140,6 +139,10 @@ function App() {
 			setLayerNeuronCounts([5, 10, 10, 7]);
 		}
 	};
+
+	/**
+	 * code that starts the training by calling the webworker API
+	 */
 	const run = async () => {
 		// send the model parameters in the event data here
 
@@ -155,15 +158,16 @@ function App() {
 			y_test: ytestRef.current,
 		});
 	};
-	const handleWeightUpdate = (event) => {
+
+	/**
+	 * Process messages coming from the webworker
+	 * @param {*} event the event message from the webworker
+	 * @returns
+	 */
+	const handleWebworkerMessage = (event) => {
 		let string = event.data;
 		const obj = string;
-		// the object send is not a string, it's JSON
-		if (obj.xtest) {
-			setXtest(obj.xtest);
-			setYtest(obj.ytest);
-			return;
-		}
+
 		// console.log(data);
 		if (string == "numpy loaded") {
 			setReady(true);
@@ -185,6 +189,12 @@ function App() {
 			// console.log(all_predictions_decoded);
 		}
 	};
+
+	const displayAtCertainEpoch = (epoch) => {
+		// passed into the replay bar
+		console.log(epoch);
+	};
+
 	useEffect(() => {
 		// console.log("use effect executed");
 		initDataRefsBasedOnTask(selectedTask.value);
@@ -192,13 +202,15 @@ function App() {
 			const weights = initWeightsFromLayerNeuronCounts(layerNeuronCounts);
 			setDecodedWeights(weights);
 		}
-		onWorkerMessageExecute(handleWeightUpdate);
+		onWorkerMessageExecute(handleWebworkerMessage);
 	}, [selectedTask, irisDataFeatures]);
 	// initDataRefsBasedOnTask(selectedTask.value);
 	return (
 		<div className="mainContainer">
-			<div className="AppContainer">
-				<div>
+			<SocialCorner />
+
+			<div className="SimulationContainer">
+				<div className="ControlContainer">
 					<button
 						onClick={run}
 						disabled={loading == true || ready == false}
@@ -208,47 +220,48 @@ function App() {
 					>
 						Start Training
 					</button>
-					<div>
-						Select a ML task. Currently set to{" "}
-						{selectedTask ? selectedTask.label : "None"}
-					</div>
-					<TaskSelectorDropdown
-						options={taskOptions}
-						defaultOption={taskOptions[defaultTaskIndex]}
-						onOptionSelect={handleSelectTask}
-						placeholder="Select a framework"
-						style={{ marginBottom: "16px" }}
-					/>
-					<WeightsGraph
-						weights={decodedWeights}
-						layerNeuronCounts={layerNeuronCounts}
-						loading={loading}
-					/>
+					<ReplayBar displayAtCertainEpoch={displayAtCertainEpoch} />
 				</div>
-				<div className="predictionsContainer">
-					{selectedTask.value === "dummy" && (
-						<div className="predictionsHeatmapContainer">
-							<PredictionsMatrix
-								predictions={dummyDataLabels}
-								fallback={undefined}
-								title={"True Labels (One-hot encoded)"}
-							/>
-							<PredictionsMatrix
-								predictions={decodedPredictions}
-								fallback={dummyDataLabels}
-								title={"Predictions (One-hot encoded)"}
-							/>
-						</div>
-					)}
-					{selectedTask.value === "iris" && xtestRef.current && (
-						<div className="MCpredictionsContainer">
-							<MultiClassPredictions
-								samples={xtestRef.current}
-								trueLabels={ytestRef.current}
-								predictions={decodedPredictions}
-							/>
-						</div>
-					)}
+				<div className="VisualizationContainer">
+					<div>
+						<TaskSelectorDropdown
+							options={taskOptions}
+							defaultOption={taskOptions[defaultTaskIndex]}
+							onOptionSelect={handleSelectTask}
+							placeholder="Select a framework"
+							style={{ marginBottom: "16px" }}
+						/>
+						<WeightsGraph
+							weights={decodedWeights}
+							layerNeuronCounts={layerNeuronCounts}
+							loading={loading}
+						/>
+					</div>
+					<div className="predictionsContainer">
+						{selectedTask.value === "dummy" && (
+							<div className="predictionsHeatmapContainer">
+								<PredictionsMatrix
+									predictions={dummyDataLabels}
+									fallback={undefined}
+									title={"True Labels (One-hot encoded)"}
+								/>
+								<PredictionsMatrix
+									predictions={decodedPredictions}
+									fallback={dummyDataLabels}
+									title={"Predictions (One-hot encoded)"}
+								/>
+							</div>
+						)}
+						{selectedTask.value === "iris" && xtestRef.current && (
+							<div className="MCpredictionsContainer">
+								<MultiClassPredictions
+									samples={xtestRef.current}
+									trueLabels={ytestRef.current}
+									predictions={decodedPredictions}
+								/>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

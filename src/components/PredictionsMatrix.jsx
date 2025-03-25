@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "../components_styles/PredictionsMatrix.module.scss";
 const convert = (predictions) => {
 	// check if predictions are one-hot encoded
 	// console.log("Type of predictions:", typeof predictions);
@@ -44,10 +45,10 @@ const PredictionsMatrix = ({ predictions, fallback, title }) => {
 
 	// Render a grid where each cell is a square
 	return (
-		<div style={{ display: "inline-block", border: "1px solid #ccc" }}>
-			<div>{title}</div>
+		<div className={styles.container}>
+			<div className={styles.title}>{title}</div>
 			{predictionsMUTABLE.map((row, rowIndex) => (
-				<div key={rowIndex} style={{ display: "flex" }}>
+				<div key={rowIndex} className={styles.tableRow}>
 					{row.map((cell, cellIndex) => (
 						<div
 							key={cellIndex}

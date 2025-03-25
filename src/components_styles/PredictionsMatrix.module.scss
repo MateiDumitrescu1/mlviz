@@ -1,0 +1,14 @@
+.container {
+    display: "inline-block";
+    border: "1px solid #ccc";
+    margin: 1rem;
+}
+
+.tableRow {
+    display: flex;
+}
+
+.title {
+    font-size: 1.1rem;
+    margin: 0.25rem;
+}

@@ -68,7 +68,7 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 				<table className={styles.table}>
 					<thead>
 						<tr>
-							<th>Sample #</th>
+							<th>Id</th>
 							<th>Sepal Length</th>
 							<th>Sepal Width</th>
 							<th>Petal Length</th>

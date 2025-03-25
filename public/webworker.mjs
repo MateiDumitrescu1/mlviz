@@ -48,8 +48,7 @@ self.addEventListener("message", async (event) => {
 	await pyodide.globals.set("y_train_global", y_train);
 	await pyodide.globals.set("x_test_global", x_test);
 	await pyodide.globals.set("y_test_global", y_test);
-	//* send a message to the frontend with the test data
-	postMessage({ xtest: x_test, ytest: y_test });
+
 	// console.log("printing the features from webworker", features);
 	// console.log("printing the labels from webworker", labels);
 	// console.log("printing the layout from webworker", networkLayout);
