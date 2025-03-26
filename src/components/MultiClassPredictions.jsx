@@ -6,7 +6,12 @@ const IRIS_CLASSES = ["Setosa", "Versicolor", "Virginica"];
 
 //* the passed in predictions parameter should be a matrix
 //* the passed in true labels should be 1-hot
-const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
+const MultiClassPredictions = ({
+	samples,
+	trueLabels,
+	headerTitle,
+	predictions = [],
+}) => {
 	// console.log("dsasda!!", samples);
 	//TODO check if the predictions array matches the trueLabels array.
 
@@ -47,7 +52,7 @@ const MultiClassPredictions = ({ samples, trueLabels, predictions = [] }) => {
 	return (
 		<div className={styles.container}>
 			<div className={styles.header}>
-				<h1 className={styles.title}>IRIS Classification Results</h1>
+				<h1 className={styles.title}>{headerTitle}</h1>
 				<div className={styles.accuracyContainer}>
 					<span className={styles.accuracyLabel}>Accuracy:</span>
 					<span className={styles.accuracyValue}>

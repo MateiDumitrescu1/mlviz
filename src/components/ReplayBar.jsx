@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "../components_styles/ReplayBar.module.scss";
 
-const ReplayBar = ({ displayAtCertainEpoch, trainingEpochs, isTraining }) => {
+const ReplayBar = ({
+	displayAtCertainEpoch,
+	trainingEpochs,
+	isTraining,
+	loading,
+}) => {
 	const [currentEpoch, setCurrentEpoch] = useState(0);
 	const barRef = useRef(null);
 	const [isDragging, setIsDragging] = useState(false);
 
-	const verticalBarWidth = 4;
+	const verticalBarWidth = 2;
 
 	// Computes the epoch number based on the mouse position relative to the replay bar.
 	const updateEpochFromPosition = (clientX) => {
@@ -52,20 +57,37 @@ const ReplayBar = ({ displayAtCertainEpoch, trainingEpochs, isTraining }) => {
 		};
 	}, [isDragging]);
 
+	useEffect(() => {
+		setCurrentEpoch(0);
+	}, [isTraining]);
+	const calculateDraggableBarLeftOffset = () => {
+		if (!barRef.current || trainingEpochs === 0) return "0%";
+		const percentage = (currentEpoch / trainingEpochs) * 100;
+		return `calc(${percentage}% - ${Math.min(
+			percentage,
+			verticalBarWidth / 2
+		)}px)`;
+	};
 	return (
 		<div
 			className={`${styles.replayBarContainer} ${
-				isTraining ? styles.training : ""
+				isTraining ? styles.duringTraining : ""
 			}`}
 			ref={barRef}
 			onMouseDown={handleMouseDown}
 		>
+			{loading && (
+				<div className={styles.replayBarMessage}>Loading numpy...</div>
+			)}
+			{isTraining && (
+				<div className={styles.replayBarMessage}>Training...</div>
+			)}
 			<div
-				className={styles.draggableBar}
+				className={`${styles.draggableBar} ${
+					isTraining ? styles.draggableBarDuringTraining : ""
+				}`}
 				style={{
-					left: `calc(${(currentEpoch / trainingEpochs) * 100}% - ${
-						verticalBarWidth / 2
-					}px)`,
+					left: calculateDraggableBarLeftOffset(),
 					width: `${verticalBarWidth}px`,
 				}}
 			/>

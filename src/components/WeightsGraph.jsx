@@ -142,11 +142,11 @@ const WeightsGraph = ({ weights, layerNeuronCounts, loading }) => {
 
 	return (
 		<>
-			{loading == true ? (
+			{/* {loading == true ? (
 				<div>Loading numpy...Should only take a few seconds❤️</div>
 			) : (
 				<div>Ready to train!{loading}</div>
-			)}
+			)} */}
 			<canvas
 				ref={canvasRef}
 				width={800}

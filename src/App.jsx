@@ -217,25 +217,27 @@ function App() {
 			<SocialCorner />
 
 			<div className="SimulationContainer">
-				<div className="ControlContainer">
-					<button
-						className="startButton"
-						onClick={run}
-						disabled={loading == true || ready == false}
-						style={{
-							backgroundColor: loading ? "gray" : "initial",
-						}}
-					>
-						Start Training
-					</button>
-					<ReplayBar
-						displayAtCertainEpoch={displayAtCertainEpoch}
-						trainingEpochs={trainingNumberOfEpochs}
-						isTraining={!ready}
-					/>
+				<div className="TopControlContainer">
+					<div className="playReplayContainer">
+						<button
+							className={`startButton ${
+								loading ? "loadingButton" : ""
+							}`}
+							onClick={run}
+							disabled={loading == true || ready == false}
+						>
+							Start Training
+						</button>
+						<ReplayBar
+							displayAtCertainEpoch={displayAtCertainEpoch}
+							trainingEpochs={trainingNumberOfEpochs}
+							isTraining={!ready}
+							loading={loading}
+						/>
+					</div>
 				</div>
 				<div className="VisualizationContainer">
-					<div>
+					<div className="leftColumn">
 						<TaskSelectorDropdown
 							options={taskOptions}
 							defaultOption={taskOptions[defaultTaskIndex]}
@@ -269,6 +271,7 @@ function App() {
 								<MultiClassPredictions
 									samples={xtestRef.current}
 									trueLabels={ytestRef.current}
+									headerTitle={"IRIS Classification Results"}
 									predictions={decodedPredictions}
 								/>
 							</div>
