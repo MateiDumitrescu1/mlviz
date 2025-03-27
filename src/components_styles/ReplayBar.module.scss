@@ -13,6 +13,22 @@
     align-items: center;
     justify-content: center;
 
+    &:not(:hover) {
+        .block {
+            transition: width 0.2s ease-out;
+        }
+    }
+
+    .block {
+        background-color: red;
+        height: 100%;
+        position: absolute;
+        left: 0px;
+        opacity: 0.2;
+        user-select: none;
+        pointer-events: none;
+    }
+
     .replayBarMessage {
         user-select: none;
         position: relative;
@@ -26,6 +42,7 @@
         font-style: italic;
         font-size: 1rem;
     }
+
     .epochShowerP {
         position: absolute;
         right: 0.5rem;
@@ -33,6 +50,9 @@
     }
 
     &:hover {
+        border: 1px solid var(--light_blue);
+        transition: border-color 0.25s;
+
         p {
             opacity: 0;
         }

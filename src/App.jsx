@@ -243,7 +243,7 @@ function App() {
 	// initDataRefsBasedOnTask(selectedTask.value);
 
 	const switchPressFunction = (checked) => {
-		setHints(!checked);
+		setHints(checked);
 	};
 
 	return (

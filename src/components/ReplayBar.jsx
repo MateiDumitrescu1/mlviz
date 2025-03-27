@@ -8,10 +8,12 @@ const ReplayBar = ({
 	loading,
 	showHintsTrueOrFalse,
 }) => {
+	const [mousePositionX, setMousePositionX] = useState(null);
+	const [mousePositionY, setMousePositionY] = useState(null);
+
 	const [currentEpoch, setCurrentEpoch] = useState(0);
 	const barRef = useRef(null);
 	const [isDragging, setIsDragging] = useState(false);
-
 	const verticalBarWidth = 2;
 
 	// Computes the epoch number based on the mouse position relative to the replay bar.
@@ -26,6 +28,15 @@ const ReplayBar = ({
 		displayAtCertainEpoch(newEpoch);
 	};
 
+	const calculateBlockXEndpoint = () => {
+		if (!barRef.current) return "0%";
+		if (mousePositionX === null) return "0%";
+		const rect = barRef.current.getBoundingClientRect();
+		let x = mousePositionX - rect.left;
+		x = Math.max(0, Math.min(x, rect.width));
+		// console.log("x", x);
+		return `${x}px`;
+	};
 	const handleMouseDown = (e) => {
 		setIsDragging(true);
 		updateEpochFromPosition(e.clientX);
@@ -35,6 +46,9 @@ const ReplayBar = ({
 		if (isDragging) {
 			updateEpochFromPosition(e.clientX);
 		}
+		setMousePositionX(e.clientX);
+		setMousePositionY(e.clientY);
+		// console.log("dasda");
 	};
 
 	const handleMouseUp = () => {
@@ -43,18 +57,23 @@ const ReplayBar = ({
 		}
 	};
 
+	const handleMoueLeave = () => {
+		if (isDragging) {
+			setIsDragging(false);
+		}
+		setMousePositionX(null);
+		setMousePositionY(null);
+	};
+
 	// Attach global mouse events while dragging
 	useEffect(() => {
-		if (isDragging) {
-			window.addEventListener("mousemove", handleMouseMove);
-			window.addEventListener("mouseup", handleMouseUp);
-		} else {
-			window.removeEventListener("mousemove", handleMouseMove);
-			window.removeEventListener("mouseup", handleMouseUp);
-		}
+		barRef.current.addEventListener("mousemove", handleMouseMove);
+		barRef.current.addEventListener("mouseup", handleMouseUp);
+		barRef.current.addEventListener("mouseleave", handleMoueLeave);
 		return () => {
-			window.removeEventListener("mousemove", handleMouseMove);
-			window.removeEventListener("mouseup", handleMouseUp);
+			barRef.current.removeEventListener("mousemove", handleMouseMove);
+			barRef.current.removeEventListener("mouseup", handleMouseUp);
+			barRef.current.removeEventListener("mouseleave", handleMoueLeave);
 		};
 	}, [isDragging]);
 
@@ -77,6 +96,11 @@ const ReplayBar = ({
 			ref={barRef}
 			onMouseDown={handleMouseDown}
 		>
+			<div
+				className={styles.block}
+				style={{ width: calculateBlockXEndpoint() }}
+			></div>
+
 			{loading && (
 				<div className={styles.replayBarMessage}>Loading numpy...</div>
 			)}
@@ -88,7 +112,11 @@ const ReplayBar = ({
 					after training, click or drag to replay epochs
 				</p>
 			)}
-			<p className={styles.epochShowerP}>{currentEpoch}{"/"}{trainingEpochs}</p>
+			<p className={styles.epochShowerP}>
+				{currentEpoch}
+				{"/"}
+				{trainingEpochs}
+			</p>
 			<div
 				className={`${styles.draggableBar} ${
 					isTraining ? styles.draggableBarDuringTraining : ""

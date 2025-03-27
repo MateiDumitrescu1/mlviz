@@ -4,13 +4,13 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { Switch, FormControlLabel } from "@mui/material";
 import styles from "../components_styles/SocialCorner.module.scss";
 const SocialCorner = ({ switchPressFunction }) => {
-	const [checked, setChecked] = useState(false);
+	const [checked, setChecked] = useState(true);
 
 	const handleChange = (event) => {
 		setChecked(event.target.checked);
 		// do something with the toggle state
 		switchPressFunction(event.target.checked);
-		console.log(event.target.checked);
+		// console.log(event.target.checked);
 	};
 	return (
 		<div className={styles.container}>
@@ -44,7 +44,7 @@ const SocialCorner = ({ switchPressFunction }) => {
 						}}
 					/>
 				}
-				label={checked ? "NO HINTS: ON" : "NO HINTS: OFF"}
+				label={"HINTS"}
 			/>
 		</div>
 	);
