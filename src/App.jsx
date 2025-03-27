@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+
 import "./App.scss";
 import {
 	startTraining,
@@ -92,6 +93,8 @@ const decodeString_predictions = (encodedString) => {
 };
 
 function App() {
+	const [hints, setHints] = useState(true);
+	// NN parameter states
 	const [decodedWeights, setDecodedWeights] = useState([]);
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([4, 5, 3]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
@@ -238,9 +241,14 @@ function App() {
 		};
 	}, [selectedTask, irisDataFeatures]);
 	// initDataRefsBasedOnTask(selectedTask.value);
+
+	const switchPressFunction = (checked) => {
+		setHints(!checked);
+	};
+
 	return (
 		<div className="mainContainer">
-			<SocialCorner />
+			<SocialCorner switchPressFunction={switchPressFunction} />
 
 			<div className="SimulationContainer">
 				<div className="TopControlContainer">
@@ -273,6 +281,7 @@ function App() {
 							trainingEpochs={trainingNumberOfEpochs}
 							isTraining={!ready}
 							loading={loading}
+							showHintsTrueOrFalse={hints}
 						/>
 					</div>
 				</div>

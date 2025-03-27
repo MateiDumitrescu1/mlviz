@@ -6,6 +6,7 @@ const ReplayBar = ({
 	trainingEpochs,
 	isTraining,
 	loading,
+	showHintsTrueOrFalse,
 }) => {
 	const [currentEpoch, setCurrentEpoch] = useState(0);
 	const barRef = useRef(null);
@@ -82,9 +83,11 @@ const ReplayBar = ({
 			{loading == false && isTraining && (
 				<div className={styles.replayBarMessage}>Training...</div>
 			)}
-			<p className={`${isTraining ? styles.hiddenP : ""}`}>
-				after training, click or drag to replay epochs
-			</p>
+			{showHintsTrueOrFalse && (
+				<p className={`${isTraining ? styles.hiddenP : ""}`}>
+					after training, click or drag to replay epochs
+				</p>
+			)}
 			<div
 				className={`${styles.draggableBar} ${
 					isTraining ? styles.draggableBarDuringTraining : ""
