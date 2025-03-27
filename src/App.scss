@@ -45,6 +45,9 @@
         }
 
         .startButton {
+            padding: 1px !important;
+            height: 100%;
+            width: 20%;
             padding: 0.6em 1.2em;
             font-size: 1em;
             font-weight: 500;
@@ -55,6 +58,24 @@
             min-width: 9rem;
             background-color: var(--chatgpt_gray);
             // margin: 1rem;
+
+            p {
+                position: absolute;
+                z-index: 0;
+                user-select: none;
+                pointer-events: none;
+            }
+
+            .pixelCanvasContainer {
+                opacity: 1;
+                transition: opacity 0.25s ease-in-out;
+                width: 100%;
+                height: 100%;
+            }
+
+            .pixelCanvasContainer.hiddenCanvas {
+                opacity: 0;
+            }
         }
 
         .loadingButton {

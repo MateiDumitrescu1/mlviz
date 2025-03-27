@@ -1,7 +1,8 @@
 .replayBarContainer {
     position: relative;
     height: 100%;
-    width: 300px;
+    width: 430px;
+    min-width: 430px;
     background-color: var(--chatgpt_gray);
     border: 1px solid white;
     cursor: pointer;
@@ -16,6 +17,24 @@
         user-select: none;
         position: relative;
         left: -0.1rem;
+    }
+
+    p {
+        transition: opacity 0.1s ease-in-out;
+        position: absolute;
+        user-select: none;
+        font-style: italic;
+        font-size: 1rem;
+    }
+
+    &:hover {
+        p {
+            opacity: 0;
+        }
+    }
+
+    .hiddenP {
+        display: none;
     }
 }
 

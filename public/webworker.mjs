@@ -20,6 +20,8 @@ self.addEventListener("message", async (event) => {
 	const networkLayout = event.data.networkLayout;
 	await pyodide.globals.set("NNlayout", networkLayout);
 
+	postMessage("started with training yaay");
+
 	//* create and set the list of activation functions
 	let activationFunctions = [];
 	for (let i = 1; i < networkLayout.length; i++) {

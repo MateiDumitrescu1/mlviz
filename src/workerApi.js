@@ -8,6 +8,10 @@ export async function startTraining(data) {
 	pyodideWorker.postMessage(data);
 }
 
+//TODO rename this method to addWorkerEventListener
 export function onWorkerMessageExecute(callback) {
 	pyodideWorker.addEventListener("message", callback);
+}
+export function removeWorkerMessageExecute(callback) {
+	pyodideWorker.removeEventListener("message", callback);
 }

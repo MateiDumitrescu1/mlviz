@@ -79,9 +79,12 @@ const ReplayBar = ({
 			{loading && (
 				<div className={styles.replayBarMessage}>Loading numpy...</div>
 			)}
-			{isTraining && (
+			{loading == false && isTraining && (
 				<div className={styles.replayBarMessage}>Training...</div>
 			)}
+			<p className={`${isTraining ? styles.hiddenP : ""}`}>
+				after training, click or drag to replay epochs
+			</p>
 			<div
 				className={`${styles.draggableBar} ${
 					isTraining ? styles.draggableBarDuringTraining : ""

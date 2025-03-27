@@ -1,6 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import "./App.scss";
-import { startTraining, onWorkerMessageExecute } from "./workerApi.js";
+import {
+	startTraining,
+	onWorkerMessageExecute,
+	removeWorkerMessageExecute,
+} from "./workerApi.js";
 import WeightsGraph from "./components/WeightsGraph";
 import WeightsHeatmap from "./components/WeightsHeatmap";
 import PredictionsMatrix from "./components/PredictionsMatrix";
@@ -13,7 +17,7 @@ import TaskSelectorDropdown from "./components/TaskSelectorDropdown";
 import { loadCSV } from "./utils/utils";
 import SocialCorner from "./components/SocialCorner.jsx";
 import MultiClassPredictions from "./components/MultiClassPredictions";
-
+import PixelCanvasBackground from "./components/PixelCanvasBackground.jsx";
 import Papa from "papaparse";
 
 const loadCSVFile = async (path) => {
@@ -91,12 +95,25 @@ function App() {
 	const [decodedWeights, setDecodedWeights] = useState([]);
 	const [layerNeuronCounts, setLayerNeuronCounts] = useState([4, 5, 3]);
 	const [decodedPredictions, setDecodedPredictions] = useState([]);
-
+	// refs to store the weights and predictions
+	const weightsOverTimeRef = useRef([]);
+	const predictionsOverTimeRef = useRef([]);
 	// more control states
 	const [trainingNumberOfEpochs, setTrainingNumberOfEpochs] = useState(100);
 	const [epochSelectedFromReplayBar, setEpochSelectedFromReplayBar] =
 		useState(null);
-
+	const handleEpochSelectedFromReplayBar = (epoch) => {
+		// setEpochSelectedFromReplayBar(epoch);
+		if (epoch == null) return;
+		if (weightsOverTimeRef.current.length <= epoch) return;
+		setDecodedWeights(weightsOverTimeRef.current[epoch]);
+		setDecodedPredictions(predictionsOverTimeRef.current[epoch]);
+		// console.log("matei", epoch);
+		// console.log(
+		// 	"length of stored weights",
+		// 	weightsOverTimeRef.current.length
+		// );
+	};
 	//data refs and methods
 	const datasetRef = useRef(null);
 	const xtrainRef = useRef(null);
@@ -137,6 +154,8 @@ function App() {
 		initDataRefsBasedOnTask(task.value);
 		setDecodedWeights([]); // reset the weights
 		setDecodedPredictions([]); // reset the predictions
+		weightsOverTimeRef.current = []; //TODO maybe make a method to reset all this shit: weightsOverTimeRef, decodedWeightsRef, etc
+		predictionsOverTimeRef.current = [];
 		// change network configuration based on the selected task (input and output layers)
 		if (task.value === "iris") {
 			setLayerNeuronCounts([4, 5, 3]);
@@ -150,7 +169,8 @@ function App() {
 	 */
 	const run = async () => {
 		// send the model parameters in the event data here
-
+		weightsOverTimeRef.current = [];
+		predictionsOverTimeRef.current = [];
 		initDataRefsBasedOnTask(selectedTask.value);
 		setReady(false);
 		// console.log("calling startTraining");
@@ -181,6 +201,10 @@ function App() {
 		} else if (string == "training completed") {
 			setReady(true);
 			return;
+		} else if (string == "started with training yaay") {
+			weightsOverTimeRef.current = [];
+			predictionsOverTimeRef.current = [];
+			return;
 		}
 		const firstChar = string.charAt(0);
 		string = string.slice(1);
@@ -188,21 +212,20 @@ function App() {
 			const all_weights_decoded = decodeString_weights(string);
 			// console.log(all_weights_decoded);
 			setDecodedWeights(all_weights_decoded);
+			weightsOverTimeRef.current.push(all_weights_decoded);
 			//TODO this should be a ref, so there is no rerender triggered. the ref should be passed into the WeightsGraph component
 		} else if (firstChar === "p") {
 			const all_predictions_decoded = decodeString_predictions(string);
 			setDecodedPredictions(all_predictions_decoded);
+			predictionsOverTimeRef.current.push(all_predictions_decoded);
 			//TODO same as for weights, this should be a ref
 			// console.log(all_predictions_decoded);
 		}
 	};
 
-	const displayAtCertainEpoch = (epoch) => {
-		// passed into the replay bar
-		console.log(epoch);
-	};
-
 	useEffect(() => {
+		weightsOverTimeRef.current = []; //TODO !make a method to reset all this shit: weightsOverTimeRef, decodedWeightsRef, etc
+		predictionsOverTimeRef.current = [];
 		// console.log("use effect executed");
 		initDataRefsBasedOnTask(selectedTask.value);
 		if (decodedWeights == []) {
@@ -210,6 +233,9 @@ function App() {
 			setDecodedWeights(weights);
 		}
 		onWorkerMessageExecute(handleWebworkerMessage);
+		return () => {
+			removeWorkerMessageExecute(handleWebworkerMessage);
+		};
 	}, [selectedTask, irisDataFeatures]);
 	// initDataRefsBasedOnTask(selectedTask.value);
 	return (
@@ -226,10 +252,24 @@ function App() {
 							onClick={run}
 							disabled={loading == true || ready == false}
 						>
-							Start Training
+							<p>Start Training</p>
+							<div
+								className={`pixelCanvasContainer ${
+									!ready ? "hiddenCanvas" : ""
+								}`}
+							>
+								<PixelCanvasBackground
+									colors="#eb0951, #2d1dc2"
+									gap="4"
+									speed="200"
+									noFocus="true"
+								/>
+							</div>
 						</button>
 						<ReplayBar
-							displayAtCertainEpoch={displayAtCertainEpoch}
+							displayAtCertainEpoch={
+								handleEpochSelectedFromReplayBar
+							}
 							trainingEpochs={trainingNumberOfEpochs}
 							isTraining={!ready}
 							loading={loading}
