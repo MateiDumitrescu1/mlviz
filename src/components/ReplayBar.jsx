@@ -88,6 +88,7 @@ const ReplayBar = ({
 					after training, click or drag to replay epochs
 				</p>
 			)}
+			<p className={styles.epochShowerP}>{currentEpoch}{"/"}{trainingEpochs}</p>
 			<div
 				className={`${styles.draggableBar} ${
 					isTraining ? styles.draggableBarDuringTraining : ""

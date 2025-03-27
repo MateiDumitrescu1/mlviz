@@ -26,6 +26,11 @@
         font-style: italic;
         font-size: 1rem;
     }
+    .epochShowerP {
+        position: absolute;
+        right: 0.5rem;
+        opacity: 1 !important;
+    }
 
     &:hover {
         p {
